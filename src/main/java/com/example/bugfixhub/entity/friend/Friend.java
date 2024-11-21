@@ -22,6 +22,7 @@ public class Friend extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     @Column(nullable = false)
     private String status;
 
@@ -35,4 +36,15 @@ public class Friend extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "following_id")
     private User following; // follow 요청한 사용자
+
+    public Friend(User follower, User following, String status) {
+        this.follower = follower;
+        this.following = following;
+        this.status = status;
+
+    }
+
+    public Friend(){
+
+    }
 }
