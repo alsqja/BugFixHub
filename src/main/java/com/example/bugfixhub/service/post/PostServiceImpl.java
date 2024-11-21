@@ -7,10 +7,15 @@ import com.example.bugfixhub.repository.post.PostRepository;
 import com.example.bugfixhub.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +46,65 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
 
         return new PostResDto(post);
+    }
+
+    @Override
+    public GetAllPostResDto getAllPosts(String type, String title, int page, int limit, Long userId) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("createdAt").descending());
+
+        Page<Post> postPage = postRepository.findByDeletedFalse(pageable);
+
+        if (type != null) {
+            if (Objects.equals(type, "follow")) {
+                Page<Object[]> resultPage = postRepository.findPostsWithPagination(userId, title, pageable);
+
+                List<GetAllPostResDataDto> post = resultPage.stream()
+                        .map(row -> new GetAllPostResDataDto(
+                                ((Number) row[0]).longValue(),
+                                ((Number) row[1]).longValue(),
+                                (String) row[2],
+                                (String) row[3],
+                                (String) row[4],
+                                ((Number) row[5]).intValue(),
+                                ((Timestamp) row[6]).toLocalDateTime(),
+                                ((Timestamp) row[7]).toLocalDateTime()
+                        ))
+                        .toList();
+
+                // 변수 방식이 다르기 때문에 따로 return 처리 진행
+                return new GetAllPostResDto(
+                        (long) resultPage.getTotalPages(),
+                        resultPage.getTotalElements(),
+                        post
+                );
+
+            } else if (Objects.equals(type, "info") || Objects.equals(type, "ask")) {
+                postPage = postRepository.findByTypeAndTitleLikeAndDeletedFalse(type, "%" + (title == null ? "" : title) + "%", pageable);
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "잘못된 타입입니다.");
+            }
+        } else {
+            if (title != null) {
+                postPage = postRepository.findByTitleLikeAndDeletedFalse("%" + title + "%", pageable);
+            }
+        }
+
+        Page<GetAllPostResDataDto> posts = postPage.map(post -> new GetAllPostResDataDto(
+                post.getId(),
+                post.getUser().getId(),
+                post.getUser().getName(),
+                post.getTitle(),
+                post.getType(),
+                post.getComments().size(),
+                post.getCreatedAt(),
+                post.getUpdatedAt()
+        ));
+
+        if (posts.getTotalPages() < page + 1 && posts.getTotalElements() > 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "페이지 범위를 벗어났습니다.");
+        }
+
+        return new GetAllPostResDto((long) posts.getTotalPages(), posts.getTotalElements(), posts.getContent());
     }
 
     @Override

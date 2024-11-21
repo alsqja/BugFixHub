@@ -11,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/posts")
 @RequiredArgsConstructor
@@ -30,6 +28,29 @@ public class PostController {
         PostResDto postResDto = postService.create(loginUser.getId(), postReqDto);
 
         return new ResponseEntity<>(postResDto, HttpStatus.CREATED);
+    }
+
+    /**
+     * 전체 게시글 조회
+     *
+     * @param type  : [follow || info || ask]
+     *              follow : 친구 게시글만 받아오기
+     *              info : 정보 공유 글만 받아오기
+     *              ask : 질문 글만 받아오기
+     * @param title : 제목 검색
+     * @param page  : 페이지 수 (default = 1 / size = 1 ~ totalPage)
+     * @param limit : 한 페이지 게시 글 수 (default = 10)
+     */
+    @GetMapping
+    public ResponseEntity<GetAllPostResDto> getAllPosts(
+            String type, String title,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @SessionAttribute UserResDto loginUser
+    ) {
+        GetAllPostResDto getAllPostResDto = postService.getAllPosts(type, title, page - 1, limit, loginUser.getId());
+
+        return new ResponseEntity<>(getAllPostResDto, HttpStatus.OK);
     }
 
     /**
