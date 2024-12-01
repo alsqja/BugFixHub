@@ -1,6 +1,6 @@
 package com.example.bugfixhub.controller.user;
 
-import com.example.bugfixhub.dto.post.GetAllPostResDto;
+import com.example.bugfixhub.dto.post.GetAllUserPostResDto;
 import com.example.bugfixhub.dto.user.CheckPasswordReqDto;
 import com.example.bugfixhub.dto.user.CreateUserReqDto;
 import com.example.bugfixhub.dto.user.LoginReqDto;
@@ -12,7 +12,6 @@ import com.example.bugfixhub.session.Const;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,13 +73,14 @@ public class UserController {
     }
 
     @GetMapping("/{id}/posts")
-    public ResponseEntity<GetAllPostResDto> findAllUserPost(
+    public ResponseEntity<GetAllUserPostResDto> findAllUserPost(
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int limit
+            @RequestParam(defaultValue = "10") int limit,
+            @SessionAttribute UserResDto loginUser
     ) {
 
-        return new ResponseEntity<>(userService.findAllUserPost(id, page - 1, limit), HttpStatus.OK);
+        return new ResponseEntity<>(userService.findAllUserPost(id, loginUser.getId(), page - 1, limit), HttpStatus.OK);
     }
 
     @PatchMapping

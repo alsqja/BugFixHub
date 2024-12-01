@@ -20,7 +20,7 @@ public class PostResDto {
         this.userId = post.getUser().getId();
         this.title = post.getTitle();
         this.contents = post.getContents();
-        this.type = post.getType();
+        this.type = post.getType().getValue();
         this.createdAt = post.getCreatedAt();
         this.updatedAt = post.getUpdatedAt();
     }

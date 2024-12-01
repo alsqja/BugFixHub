@@ -2,7 +2,7 @@ package com.example.bugfixhub.service.user;
 
 import com.example.bugfixhub.config.PasswordEncoder;
 import com.example.bugfixhub.dto.post.GetAllPostResDataDto;
-import com.example.bugfixhub.dto.post.GetAllPostResDto;
+import com.example.bugfixhub.dto.post.GetAllUserPostResDto;
 import com.example.bugfixhub.dto.user.CreateUserReqDto;
 import com.example.bugfixhub.dto.user.LoginReqDto;
 import com.example.bugfixhub.dto.user.UpdateUserReqDto;
@@ -122,11 +122,11 @@ public class UserServiceImpl implements UserService {
 
         isDeleted(findUser);
 
-        findUser.setDeleted(true);
+        userRepository.delete(findUser);
     }
 
     @Override
-    public GetAllPostResDto findAllUserPost(Long id, int page, int limit) {
+    public GetAllUserPostResDto findAllUserPost(Long id, Long loginUserId, int page, int limit) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by("createdAt").descending());
 
         Page<Post> postsPage = postRepository.findByUserIdAndDeletedFalse(id, pageable);
@@ -136,13 +136,15 @@ public class UserServiceImpl implements UserService {
                 post.getUser().getId(),
                 post.getUser().getName(),
                 post.getTitle(),
-                post.getType(),
+                post.getType().getValue(),
                 post.getComments().size(),
+                post.getLikes().size(),
+                post.getLikes().stream().anyMatch(i -> i.getUser().getId().equals(loginUserId)),
                 post.getCreatedAt(),
                 post.getUpdatedAt()
         ));
 
-        return new GetAllPostResDto((long) posts.getTotalPages(), posts.getTotalElements(), posts.getContent());
+        return new GetAllUserPostResDto((long) posts.getTotalPages(), posts.getTotalElements(), posts.getContent());
     }
 
     private void isDeleted(User user) {

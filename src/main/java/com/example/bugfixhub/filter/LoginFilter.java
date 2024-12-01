@@ -49,7 +49,7 @@ public class LoginFilter implements Filter {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         try {
-            String json = "{\"status\": 401, \"error\": \"UNAUTHORIZED\", \"message\": \"login is required\", \"timestamp\": " + System.currentTimeMillis() + "}";
+            String json = "{\"status\": 401, \"error\": \"UNAUTHORIZED\", \"message\": \"로그인 해주세요.\", \"timestamp\": " + System.currentTimeMillis() + "}";
             response.getWriter().write(json);
         } catch (Exception e) {
             log.error(e.getMessage());

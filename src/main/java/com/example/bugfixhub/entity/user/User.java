@@ -14,6 +14,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
 @Getter
 @Entity
 @Table(name = "user")
+@SQLDelete(sql = "UPDATE user SET deleted = true WHERE id = ?")
 public class User extends BaseEntity {
 
     @Id
