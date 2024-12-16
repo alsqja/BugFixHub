@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
+import org.jetbrains.annotations.TestOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,30 @@ public class User extends BaseEntity {
         this.password = password;
     }
 
-    public User() {
+    @TestOnly
+    public User(Long id, String name, String email, String password) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
 
+    @TestOnly
+    public User(Long id, String name, String email, String password, boolean deleted) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.deleted = deleted;
+    }
+
+    @TestOnly
+    public void setFollowers(List<Friend> followers) {
+        this.followers = followers;
+    }
+
+    @TestOnly
+    public void setFollowings(List<Friend> followings) {
+        this.followings = followings;
     }
 }
